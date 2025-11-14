@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>ICU Admin</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+  <div class="topbar">
+    <h1>ICU — Active Alerts</h1>
+    <a class="logout" href="/logout">Logout</a>
+  </div>
+  <div id="alerts" class="grid"></div>
+
+  <script>
+    async function fetchAlerts() {
+      const r = await fetch('/api/active_alerts');
+      if (!r.ok) return;
+      const data = await r.json();
+      const container = document.getElementById('alerts');
+      if (data.length === 0) {
+        container.innerHTML = '<p class="no-alerts">No active alerts</p>';
+        return;
+      }
+      container.innerHTML = data.map(a => `
+    <div class="card alert">
+      <div class="card-header">Bed ${a.BedNo} — ${a.PatientName}</div>
+      <div class="card-body">
+        <p>HR: ${a.HeartRate} bpm &nbsp; BP: ${a.BloodPressure} &nbsp; SpO₂: ${a.SpO2}%</p>
+        <p class="msg">${a.AlertMessage} <small>${a.AlertTime}</small></p>
+        <button onclick="ack('${a.PatientID}')">Acknowledge</button>
+      </div>
+    </div>
+  `).join('');
+    }
+
+    async function ack(patientId) {
+      await fetch('/api/ack_patient', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ patient_id: patientId })
+      });
+      fetchAlerts();
+    }
+
+    fetchAlerts();
+    setInterval(fetchAlerts, 5000);
+  </script>
+</body>
+
+</html>

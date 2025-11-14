@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>ICU Login</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+  <div class="center">
+    <h1>ICU Monitoring — Login</h1>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <div class="card">
+      <h3>Staff / Admin</h3>
+      <form action="/login/staff" method="post">
+        <input name="staffid" placeholder="StaffID or AdminID" required>
+        <input name="password" type="password" placeholder="Password" required>
+        <div class="btnrow">
+          <button type="submit" name="role" value="staff">Login as Staff</button>
+          <button type="submit" name="role" value="admin">Login as Admin</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>Family</h3>
+      <form action="/login/family" method="post">
+        <input name="fname" placeholder="Family Member Name" required>
+        <input name="familyid" placeholder="FamilyID" required>
+        <input name="fpassword" type="password" placeholder="Password" required>
+        <button type="submit">Login as Family</button>
+      </form>
+    </div>
+  </div>
+</body>
+
+</html>

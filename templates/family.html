@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Family Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .abnormal {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 style="text-align:center;">Family Portal - Patient Vitals</h2>
+    <table id="familyTable">
+        <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Bed No</th>
+                <th>Heart Rate</th>
+                <th>Blood Pressure</th>
+                <th>SpO2</th>
+                <th>Last Updated</th>
+                <th>Alert Message</th>
+                <th>Alert Time</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        async function fetchFamilyData() {
+            const res = await fetch("/api/family/patient_details");
+            if (!res.ok) return;
+            const data = await res.json();
+            const tbody = document.querySelector("#familyTable tbody");
+            tbody.innerHTML = "";
+
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+
+                // Highlight abnormal vitals if alert exists
+                const abnormalClass = row.AlertMessage ? "abnormal" : "";
+                tr.innerHTML = `
+                    <td>${row.PatientName}</td>
+                    <td>${row.BedNo}</td>
+                    <td class="${abnormalClass}">${row.HeartRate}</td>
+                    <td class="${abnormalClass}">${row.BloodPressure}</td>
+                    <td class="${abnormalClass}">${row.SpO2}</td>
+                    <td>${row.LastUpdated}</td>
+                    <td>${row.AlertMessage || "-"}</td>
+                    <td>${row.AlertTime || "-"}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Refresh every 10 seconds
+        fetchFamilyData();
+        setInterval(fetchFamilyData, 10000);
+    </script>
+</body>
+
+</html>

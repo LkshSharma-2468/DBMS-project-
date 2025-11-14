@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Staff</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+  <div class="topbar">
+    <h1>Staff Console</h1>
+    <a href="/logout">Logout</a>
+  </div>
+
+  <div id="patients"></div>
+
+  <script>
+    async function loadPatients() {
+      const r = await fetch('/api/staff/patients');
+      if (!r.ok) return;
+      const data = await r.json();
+      const c = document.getElementById('patients');
+
+      if (data.length === 0) {
+        c.innerHTML = '<p>No assigned patients</p>';
+        return;
+      }
+
+      c.innerHTML = data.map(p => `
+      <div class="card ${p.HasActiveAlert ? 'alertRow' : ''}">
+        <div class="card-header">Bed ${p.BedNo} — ${p.PatientName}</div>
+        <div class="card-body">
+          <p>HR: ${p.HeartRate} bpm &nbsp; BP: ${p.BloodPressure} &nbsp; SpO₂: ${p.SpO2}%</p>
+          ${p.HasActiveAlert ? `<b class="badge">ALERT</b> <button onclick="ack('${p.PatientID}')">Acknowledge</button>` : ''}
+        </div>
+      </div>
+    `).join('');
+    }
+
+    async function ack(pid) {
+      await fetch('/api/ack_patient', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patient_id: pid })
+      });
+      loadPatients();
+    }
+
+    loadPatients();
+    setInterval(loadPatients, 5000);
+  </script>
+</body>
+
+</html>
